@@ -1,12 +1,12 @@
-CC = g++ -Wall
-# Hopefully this works on Mac OS X -- I'll test it at some point :P
+CC = g++
 ifeq ($(shell sw_vers 2>/dev/null | grep Mac | awk '{ print $$2}'),Mac)
-        CFLAGS = -g -dosx -Iinclude
-        LDFLAGS = -L"/system/library/frameworks/opengl.framework/libraries" \
-        	-lm -lstdc++ -L./lib/mac -lfreeimage
+	CFLAGS = -g -DGL_GLEXT_PROTOTYPES -I./include/ -I/usr/X11/include -DOSX
+	LDFLAGS = -framework GLUT -framework OpenGL \
+    	-L"/System/Library/Frameworks/OpenGL.framework/Libraries" \
+    	-lm -lstdc++ -L./lib/mac -lfreeimage
 else
-        CFLAGS = -g -Iinclude
-        LDFLAGS = -L./lib/nix -lfreeimage
+	CFLAGS = -g -DGL_GLEXT_PROTOTYPES -Iglut-3.7.6-bin
+	LDFLAGS = -L./lib/nix -lfreeimage
 endif
 	
 RM = /bin/rm -f 
