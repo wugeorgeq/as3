@@ -11,14 +11,17 @@ endif
 	
 RM = /bin/rm -f 
 all: main 
-ALL_OBJS = obj/main.o obj/parser.o
+ALL_OBJS = obj/main.o obj/parser.o obj/subdivide.o
 main: $(ALL_OBJS)
 	$(CC) $(CFLAGS) -o as3 $(ALL_OBJS) $(LDFLAGS) 
-MAIN_DEP = include/Parser.h
+MAIN_DEP = include/Parser.h include/Subdivide.h
 obj/main.o: src/main.cpp $(MAIN_DEP)
 	$(CC) $(CFLAGS) -c src/main.cpp -o obj/main.o
 obj/parser.o: src/Parser.cpp
 	$(CC) $(CFLAGS) -c src/Parser.cpp -o obj/parser.o
+SUB_DEP = include/Parser.h
+obj/subdivide.o: src/Subdivide.cpp $(SUB_DEP)
+	$(CC) $(CFLAGS) -c src/Subdivide.cpp -o obj/subdivide.o
 clean: 
 	$(RM) *.o as3
 

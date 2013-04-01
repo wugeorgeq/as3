@@ -1,5 +1,6 @@
 #include <vector>
 #include "Subdivide.h"
+#include "Parser.h"
 
 using namespace Eigen;
 using namespace std;

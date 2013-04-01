@@ -23,7 +23,7 @@
 #include <Eigen/Dense>
 
 #include "Parser.h"
-//#include "Subdivide.h"
+#include "Subdivide.h"
 
 #define PI 3.14159265  // Should be used from mathlib
 
@@ -118,7 +118,8 @@ int main(int argc, char** argv) {
 	cout << walla << endl;
 	
 	delete c_Parser;
-
+	
+	
 	//This initializes glut
   	glutInit(&argc, argv);
 
@@ -141,6 +142,7 @@ int main(int argc, char** argv) {
 
   	glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
+  	
 	return 0;
 
 }

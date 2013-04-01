@@ -1,10 +1,13 @@
 //Class that subdivides Bezier objects
 
 #ifndef _SUBDIVIDE_H
-#define -_SUBDIVIDE_H
+#define _SUBDIVIDE_H
 
 #include <vector>
+#include <Eigen/Dense>
 #include "Parser.h"
+
+using namespace Eigen;
 
 struct curvePointAndDeriv {
 	float curvePoint;
