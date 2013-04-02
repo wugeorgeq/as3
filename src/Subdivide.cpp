@@ -10,7 +10,11 @@ cSubdivide::cSubdivide()
 
 }
 
+<<<<<<< HEAD
 curvePointAndDeriv cSubdivide::bezCurveInterp(vector<Vector3f> curve, float pValue){
+=======
+	curvePointAndDeriv cSubdivide::bezCurveInterp(Vector3f curve, float pValue){
+>>>>>>> tried to change patch, but failed lol
 	curvePointAndDeriv pair;
 
 	//split 3 segments of the curve into two: AB and BC

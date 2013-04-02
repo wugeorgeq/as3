@@ -108,18 +108,22 @@ int main(int argc, char** argv) {
 	// parser class takes in .bez file
 	// for example, make, then type in ./as3 patches/test.bez .1
 	c_Parser = new cParser(argc, argv);
+	cout << "parser obj instantiated" << endl;
 	// vector of patches is returned from parser
 	vector<patch> temp = c_Parser->ParseCommandLine();
 	
+	cout << "got patch" << endl;
 	// gonna test to see if patch stuffy stuff worked
 	patch patch2 = temp[1];
-	Vector3f walla = patch2.p2[1];
+	Vector3f walla = patch2.r2[1];
+	//Vector3f balla = patch2.c1[2];
 	cout << "should be .33 .66 2.00 " << endl;
 	cout << walla << endl;
+	//cout << balla << endl;
 	
 	delete c_Parser;
 	
-	
+	/*
 	//This initializes glut
   	glutInit(&argc, argv);
 
@@ -142,7 +146,7 @@ int main(int argc, char** argv) {
 
   	glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
-  	
+  	*/
 	return 0;
 
 }

@@ -21,8 +21,13 @@ struct surfacePointAndNorm {
 
 class cSubdivide {
 public:
+<<<<<<< HEAD
 	cSubdivide();
 	~cSubdivide();
+=======
+	//cSubdivide();
+	//virtual cSubdivide();
+>>>>>>> tried to change patch, but failed lol
 
 	virtual curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float) {}
 	virtual surfacePointAndNorm bezPatchInterp(vector<Vector3f>, float, float) {}
