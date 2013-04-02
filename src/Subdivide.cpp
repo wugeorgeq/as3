@@ -5,50 +5,50 @@
 using namespace Eigen;
 using namespace std;
 
-/*cSubdivide::cSubdivide()
+cSubdivide::cSubdivide()
 {
 
 }
 
-curvePointAndDeriv cSubdivide::bezCurveInterp(Vector3f curve, float pValue){
+curvePointAndDeriv cSubdivide::bezCurveInterp(vector<Vector3f> curve, float pValue){
 	curvePointAndDeriv pair;
 
 	//split 3 segments of the curve into two: AB and BC
-	float a = curve(0) * (1.0-pValue) + curve(1) * pValue;
-	float b = curve(1) * (1.0-pValue) + curve(2) * pValue;
-	float c = curve(2) * (1.0-pValue) + curve(3) * pValue;
+	Vector3f a = curve[0] * (1.0-pValue) + curve[1] * pValue;
+	Vector3f b = curve[1] * (1.0-pValue) + curve[2] * pValue;
+	Vector3f c = curve[2] * (1.0-pValue) + curve[3] * pValue;
 
 	//split AB and BC to form a new segment DE
-	float d = a * (1.0-pValue) + b * pValue;
-	float e = b * (1.0-pValue) + c * pValue;
+	Vector3f d = a * (1.0-pValue) + b * pValue;
+	Vector3f e = b * (1.0-pValue) + c * pValue;
 
 	//pick the right point on DE
-	float p = d * (1.0-pValue) + e * pValue;
+	Vector3f p = d * (1.0-pValue) + e * pValue;
 
-	//comput the derivative
-	float dPdu = 3 * (e-d);
+	//compute the derivative
+	Vector3f dPdu = 3 * (e-d);
 
 	pair.curvePoint = p;
 	pair.deriv = dPdu;
 	return pair;
 }
 
-surfacePointAndNorm cSubdivide::bezPatchInterp(Vector3f patch, float u , float v){
-	surfacePointAndNorm pair;
+surfacePointAndNorm cSubdivide::bezPatchInterp(vector<Vector3f> patch, float u , float v){
+	surfacePointAndNorm pair2;
 
 	//make control points for a Bezier curve in v
-	curvePointAndDeriv vCurve;
-	vCurve(0) = bezCurveInterp(patch(0), u);
-	vCurve(1) = bezCurveInterp(patch(1), u);
-	vCurve(2) = bezCurveInterp(patch(2), u);
-	vCurve(3) = bezCurveInterp(patch(3), u);
+	vector<curvePointAndDeriv> vCurve;
+	vCurve(0) = bezCurveInterp(patch.r0, u);
+	vCurve(1) = bezCurveInterp(patch.r1, u);
+	vCurve(2) = bezCurveInterp(patch.r2, u);
+	vCurve(3) = bezCurveInterp(patch.r3, u);
 
 	//make control points for a Bezier curve in u
-	curvePointAndDeriv uCurve;
-	uCurve(0) = bezCurveInterp(patch(0), v);
-	uCurve(1) = bezCurveInterp(patch(1), v);
-	uCurve(2) = bezCurveInterp(patch(2), v);
-	uCurve(3) = bezCurveInterp(patch(3), v);
+	vector<curvePointAndDeriv> uCurve;
+	uCurve(0) = bezCurveInterp(patch.c0, v);
+	uCurve(1) = bezCurveInterp(patch.c1, v);
+	uCurve(2) = bezCurveInterp(patch.c2, v);
+	uCurve(3) = bezCurveInterp(patch.c3, v);
 
 	//evaluate surface and derivative for u and v
 	curvePointAndDeriv newV, newU;
@@ -56,31 +56,33 @@ surfacePointAndNorm cSubdivide::bezPatchInterp(Vector3f patch, float u , float v
 	newU = bezCurveInterp(uCurve, u);
 
 	//cross product of partials to find normal
-	Vector3f n;
-	
+	Vector3f n = (newU.deriv).cross(newV.deriv);
+	n = n/length(n);
 
-	pair.surfacePoint = newV(0);
-	pair.norm = n;
+	pair2.surfacePoint = newV.curvePoint;
+	pair2.norm = n;
 
-	return n; //FIX!!
+	return pair2;
 }
 
-void cSubdivide::subdivideUniform(Vector3f patch){
+void cSubdivide::subdivideUniform(vector<Vector3f> patch){
 	vector<Vector3f> savedSurfacePointAndNormal;
+	int index = 0;
 	float step = getParam();
 
 	//compute # of subdivisions there are for this step size
-	float numDiv; //FIX!!!
+	float numDiv = 1/step;
 
 	//for each parametric value of u
-	for(int i = 0; i < numDiv; i++){
-		float u = uPValue*step;
+	for(int i = 0; i <= numDiv; i+=numDiv){
+		float u = i*step;
 
-		for(int j = 0; j < numDiv; j++){
-			float v = vPValue*step;
+		for(int j = 0; j <= numDiv; j+=numDiv){
+			float v = j*step;
 
 			surfacePointAndNorm x = bezPatchInterp(patch, u, v);
-			savedSurfacePointAndNormal(j) = x;
+			savedSurfacePointAndNormal(index) = x;
+			index++;
 		}
 	}
 
@@ -88,4 +90,4 @@ void cSubdivide::subdivideUniform(Vector3f patch){
 
 cSubdivide::~cSubdivide() {
 
-}*/
+}

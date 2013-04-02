@@ -10,24 +10,24 @@
 using namespace Eigen;
 
 struct curvePointAndDeriv {
-	float curvePoint;
-	float deriv;
+	Vector3f curvePoint;
+	Vector3f deriv;
 };
 
 struct surfacePointAndNorm {
-	float surfacePoint;
+	vector<Vector3f> surfacePoint;
 	vector<Vector3f> norm;
 };
 
-class Subdivide {
+class cSubdivide {
 public:
-	//cSubdivide(curvePointAndDeriv, surfacePointAndNorm);
-	//virtual cSubdivide();
+	cSubdivide();
+	~cSubdivide();
 
-	virtual curvePointAndDeriv* bezCurveInterp(Vector3f, float) {}
-	virtual surfacePointAndNorm* bezPatchInterp(Vector3f, float, float) {}
+	virtual curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float) {}
+	virtual surfacePointAndNorm bezPatchInterp(vector<Vector3f>, float, float) {}
 	//virtual void subdividePatch(Vector3f);
-	virtual void subdivideUniform(Vector3f) {}
+	virtual void subdivideUniform(vector<Vector3f>) {}
 	virtual void subdivideAdapt(Vector3f) {}
 	float getParam() const {return param;}
 
