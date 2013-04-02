@@ -45,25 +45,49 @@ surfacePointAndNorm cSubdivide::bezPatchInterp(patch p, float u , float v){
 	//make control points for a Bezier curve in v
 	vector<curvePointAndDeriv> vCurve;
 	
-	vCurve[0] = bezCurveInterp(p.p0, u);
-	vCurve[1] = bezCurveInterp(p.p1, u);
-	vCurve[2] = bezCurveInterp(p.p2, u);
-	vCurve[3] = bezCurveInterp(p.p3, u);
+	vCurve.push_back(bezCurveInterp(p.p0, u));
+	vCurve.push_back(bezCurveInterp(p.p1, u));
+	vCurve.push_back(bezCurveInterp(p.p2, u));
+	vCurve.push_back(bezCurveInterp(p.p3, u));
 
 	//make control points for a Bezier curve in u
 	vector<curvePointAndDeriv> uCurve;
 	
-	uCurve[0] = bezCurveInterp(p.p0, v);
-	uCurve[1] = bezCurveInterp(p.p1, v);
-	uCurve[2] = bezCurveInterp(p.p2, v);
-	uCurve[3] = bezCurveInterp(p.p3, v);
+	vector<Vector3f> col0;
+    col0.push_back(p.p0[0]);
+    col0.push_back(p.p1[0]);
+    col0.push_back(p.p2[0]);
+    col0.push_back(p.p3[0]);
+
+    vector<Vector3f> col1;
+    col0.push_back(p.p0[1]);
+	col0.push_back(p.p1[1]);
+	col0.push_back(p.p2[1]);
+	col0.push_back(p.p3[1]);
+
+	vector<Vector3f> col2;
+	col0.push_back(p.p0[2]);
+	col0.push_back(p.p1[2]);
+	col0.push_back(p.p2[2]);
+	col0.push_back(p.p3[2]);
+
+	vector<Vector3f> col3;
+	col0.push_back(p.p0[3]);
+	col0.push_back(p.p1[3]);
+	col0.push_back(p.p2[3]);
+	col0.push_back(p.p3[3]);
+	
+	uCurve.push_back(bezCurveInterp(p.p0, v));
+	uCurve.push_back(bezCurveInterp(p.p1, v));
+	uCurve.push_back(bezCurveInterp(p.p2, v));
+	uCurve.push_back(bezCurveInterp(p.p3, v));
 
 	//evaluate surface and derivative for u and v
 	curvePointAndDeriv newV, newU;
 	vector<Vector3f> tempU, tempV;
 	for (int i = 0; i < 4; i++){
-		tempU[i] = uCurve[i].curvePoint;
-		tempV[i] = vCurve[i].curvePoint;
+		tempU.push_back(uCurve[i].curvePoint);
+		tempV.push_back(vCurve[i].curvePoint);
 	}
 	
 	newV = bezCurveInterp(tempV, v);
@@ -79,26 +103,26 @@ surfacePointAndNorm cSubdivide::bezPatchInterp(patch p, float u , float v){
 	return pair2;
 }
 
-void cSubdivide::subdivideUniform(vector<Vector3f> patch){
+vector<surfacePointAndNorm> cSubdivide::subdivideUniform(patch patch){
 
 	vector<surfacePointAndNorm> savedSurfacePointAndNormal;
-	float step = getParam();
+	float step = .1;
 
 	//compute # of subdivisions there are for this step size
 	float numDiv = 1/step;
 
 	//for each parametric value of u
-	for(int i = 0; i <= numDiv; i+=numDiv){
+	for(int i = 0; i < numDiv; i++){
 		float u = i*step;
 
-		for(int j = 0; j <= numDiv; j+=numDiv){
+		for(int j = 0; j < numDiv; j++){
 			float v = j*step;
-
 			surfacePointAndNorm x = bezPatchInterp(patch, u, v);
 			savedSurfacePointAndNormal.push_back(x);
 			
 		}
 	}
+	return savedSurfacePointAndNormal;
 
 }
 

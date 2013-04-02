@@ -27,7 +27,7 @@ public:
 	curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float); 
 	surfacePointAndNorm bezPatchInterp(patch, float, float); 
 	//virtual void subdividePatch(Vector3f);
-	void subdivideUniform(vector<Vector3f>);
+	vector<surfacePointAndNorm> subdivideUniform(patch);
 	void subdivideAdapt(Vector3f);
 	float getParam() const {return param;}
 
