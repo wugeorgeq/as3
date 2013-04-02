@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
   	glutDisplayFunc(myDisplay);				// function to run when its time to draw something
   	glutReshapeFunc(myReshape);				// function to run when the window gets resized
 
-  	glutMainLoop();							// infinite loop that will keep drawing and resizing
+  	//glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
   	
 	return 0;

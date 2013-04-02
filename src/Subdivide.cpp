@@ -9,10 +9,14 @@ cSubdivide::cSubdivide()
 {
 
 }
+cSubdivide::~cSubdivide() {
+
+}
 
 curvePointAndDeriv cSubdivide::bezCurveInterp(vector<Vector3f> curve, float pValue){
-	curvePointAndDeriv pair;
 
+	curvePointAndDeriv pair;
+/*
 	//split 3 segments of the curve into two: AB and BC
 	Vector3f a = curve[0] * (1.0-pValue) + curve[1] * pValue;
 	Vector3f b = curve[1] * (1.0-pValue) + curve[2] * pValue;
@@ -30,12 +34,14 @@ curvePointAndDeriv cSubdivide::bezCurveInterp(vector<Vector3f> curve, float pVal
 
 	pair.curvePoint = p;
 	pair.deriv = dPdu;
+	*/
 	return pair;
 }
 
 surfacePointAndNorm cSubdivide::bezPatchInterp(vector<Vector3f> patch, float u , float v){
-	surfacePointAndNorm pair2;
 
+	surfacePointAndNorm pair2;
+/*
 	//make control points for a Bezier curve in v
 	vector<curvePointAndDeriv> vCurve;
 	vCurve(0) = bezCurveInterp(patch.r0, u);
@@ -61,11 +67,12 @@ surfacePointAndNorm cSubdivide::bezPatchInterp(vector<Vector3f> patch, float u ,
 
 	pair2.surfacePoint = newV.curvePoint;
 	pair2.norm = n;
-
+*/
 	return pair2;
 }
 
 void cSubdivide::subdivideUniform(vector<Vector3f> patch){
+/*
 	vector<Vector3f> savedSurfacePointAndNormal;
 	int index = 0;
 	float step = getParam();
@@ -85,9 +92,6 @@ void cSubdivide::subdivideUniform(vector<Vector3f> patch){
 			index++;
 		}
 	}
-
+*/
 }
 
-cSubdivide::~cSubdivide() {
-
-}

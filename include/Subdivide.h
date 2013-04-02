@@ -24,11 +24,11 @@ public:
 	cSubdivide();
 	~cSubdivide();
 
-	virtual curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float) {}
-	virtual surfacePointAndNorm bezPatchInterp(vector<Vector3f>, float, float) {}
+	curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float); 
+	surfacePointAndNorm bezPatchInterp(vector<Vector3f>, float, float); 
 	//virtual void subdividePatch(Vector3f);
-	virtual void subdivideUniform(vector<Vector3f>) {}
-	virtual void subdivideAdapt(Vector3f) {}
+	void subdivideUniform(vector<Vector3f>);
+	void subdivideAdapt(Vector3f);
 	float getParam() const {return param;}
 
 
