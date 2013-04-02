@@ -51,7 +51,12 @@ Viewport	viewport;
 // Simple init function
 //****************************************************
 void initScene(){
-
+	/*
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	*/
   // Nothing to do here for this simple example.
 
 }
@@ -67,7 +72,10 @@ void myReshape(int w, int h) {
   glViewport (0,0,viewport.w,viewport.h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluOrtho2D(0, viewport.w, 0, viewport.h);
+  //gluOrtho2D(0, viewport.w, 0, viewport.h);
+  
+  // from example_00
+  glOrtho(-2, 2, -2, 2, 2, -2);
 
 }
 
@@ -91,13 +99,37 @@ void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
 //***************************************************
 void myDisplay() {
 
-  glClear(GL_COLOR_BUFFER_BIT);       // clear the color buffer
+	glClear(GL_COLOR_BUFFER_BIT);       // clear the color buffer
 
-  glMatrixMode(GL_MODELVIEW);             // indicate we are specifying camera transformations
-  glLoadIdentity();               // make sure transformation is "zero'd"
+	glMatrixMode(GL_MODELVIEW);             // indicate we are specifying camera transformations
+	glLoadIdentity();               // make sure transformation is "zero'd"
+  
+	glColor3f(1.0f,0.0f,0.0f);                   // setting the color to pure red 90% for the rect
 
-  glFlush();
-  glutSwapBuffers();          // swap buffers (we earlier set double buffer)
+	glBegin(GL_POLYGON);                         // draw rectangle 
+  //glVertex3f(x val, y val, z val (won't change the point because of the projection type));
+	glVertex3f(-0.8f, 0.0f, 0.0f);               // bottom left corner of rectangle
+	glVertex3f(-0.8f, 0.5f, 0.0f);               // top left corner of rectangle
+	glVertex3f( 0.0f, 0.5f, 0.0f);               // top right corner of rectangle
+	glVertex3f( 0.0f, 0.0f, 0.0f);               // bottom right corner of rectangle
+	glEnd();
+	
+	glColor3f(1.0f,1.0f,0.0f);
+	
+	glBegin(GL_POLYGON);                         // draw rectangle 
+  //glVertex3f(x val, y val, z val (won't change the point because of the projection type));
+	glVertex3f(-0.2f, 0.0f, -1.0f);               // bottom left corner of rectangle
+	glVertex3f(-0.2f, 0.2f, -1.0f);               // top left corner of rectangle
+	glVertex3f( 0.0f, 0.2f, -1.0f);               // top right corner of rectangle
+	glVertex3f( 0.0f, 0.0f, -1.0f);               // bottom right corner of rectangle
+	glEnd();
+	
+	glBegin(GL_POINTS);
+	glVertex3f(1.5f, 1.5f, 1.5f);
+	glEnd();
+
+	glFlush();
+  	glutSwapBuffers();          // swap buffers (we earlier set double buffer)
 }
 
 
@@ -140,7 +172,7 @@ int main(int argc, char** argv) {
   	glutDisplayFunc(myDisplay);				// function to run when its time to draw something
   	glutReshapeFunc(myReshape);				// function to run when the window gets resized
 
-  	//glutMainLoop();							// infinite loop that will keep drawing and resizing
+  	glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
   	
 	return 0;
