@@ -15,8 +15,8 @@ struct curvePointAndDeriv {
 };
 
 struct surfacePointAndNorm {
-	vector<Vector3f> surfacePoint;
-	vector<Vector3f> norm;
+	Vector3f surfacePoint;
+	Vector3f norm;
 };
 
 class cSubdivide {
@@ -25,7 +25,7 @@ public:
 	~cSubdivide();
 
 	curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float); 
-	surfacePointAndNorm bezPatchInterp(vector<Vector3f>, float, float); 
+	surfacePointAndNorm bezPatchInterp(patch, float, float); 
 	//virtual void subdividePatch(Vector3f);
 	void subdivideUniform(vector<Vector3f>);
 	void subdivideAdapt(Vector3f);
