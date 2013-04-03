@@ -30,6 +30,9 @@
 using namespace std;
 using namespace Eigen;
 
+GLenum shadeModel = GL_FLAT;
+GLenum polygonMode = GL_LINE; 
+
 cParser* c_Parser = NULL;
 float step;
 cSubdivide* c_Sub = NULL;
@@ -60,7 +63,7 @@ Viewport	viewport;
 void initScene(){
 	/*
 	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT0); 
 	GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	*/
@@ -102,6 +105,25 @@ void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
 }
 
 //****************************************************
+// toggle commands
+//****************************************************
+void mykeyFunc(unsigned char key, int x, int y){
+  if(key == 'w'){
+    if(polygonMode == GL_FILL){
+      polygonMode == GL_LINE;
+    }else{
+      polygonMode == GL_FILL;
+    }
+  }else if(key == 's'){
+    if(shadeModel == GL_FLAT){
+      shadeModel = GL_SMOOTH;
+    }else{
+      shadeModel = GL_FLAT;
+    }
+  }
+  
+}
+//****************************************************
 // function that does the actual drawing of stuff
 //***************************************************
 void myDisplay() {
@@ -111,7 +133,8 @@ void myDisplay() {
 	glMatrixMode(GL_MODELVIEW);             // indicate we are specifying camera transformations
 	glLoadIdentity();               // make sure transformation is "zero'd"
 	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glShadeModel(shadeModel);
+	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
   
 	//glColor3f(1.0f,0.0f,0.0f);                   // setting the color to pure red 90% for the rect
 	
@@ -217,10 +240,10 @@ void myDisplay() {
 		}
 	}
 	
-	
 	glFlush();
   	glutSwapBuffers();          // swap buffers (we earlier set double buffer)
 }
+
 
 
 int main(int argc, char** argv) {
@@ -271,9 +294,10 @@ int main(int argc, char** argv) {
   
   	initScene();							// quick function to set up scene
 
+    
+    glutReshapeFunc(myReshape);        // function to run when the window gets resized
   	glutDisplayFunc(myDisplay);				// function to run when its time to draw something
-  	glutReshapeFunc(myReshape);				// function to run when the window gets resized
-
+  	glutKeyboardFunc(mykeyFunc);
   	glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
   	
