@@ -103,19 +103,18 @@ surfacePointAndNorm cSubdivide::bezPatchInterp(patch p, float u , float v){
 	return pair2;
 }
 
-vector<surfacePointAndNorm> cSubdivide::subdivideUniform(patch patch){
+vector<surfacePointAndNorm> cSubdivide::subdivideUniform(patch patch, float step){
 
 	vector<surfacePointAndNorm> savedSurfacePointAndNormal;
-	float step = .1;
 
 	//compute # of subdivisions there are for this step size
 	float numDiv = 1/step;
 
 	//for each parametric value of u
-	for(int i = 0; i < numDiv; i++){
+	for(int i = 0; i <= numDiv; i++){
 		float u = i*step;
 
-		for(int j = 0; j < numDiv; j++){
+		for(int j = 0; j <= numDiv; j++){
 			float v = j*step;
 			surfacePointAndNorm x = bezPatchInterp(patch, u, v);
 			savedSurfacePointAndNormal.push_back(x);
@@ -125,4 +124,48 @@ vector<surfacePointAndNorm> cSubdivide::subdivideUniform(patch patch){
 	return savedSurfacePointAndNormal;
 
 }
+
+vector<triangle> cSubdivide::subdivideAdaptive(patch patch, float step) {
+	// create 2d array of floats for u, v for the patch
+	Vector2f coords[4][4];
+	// aaaand 1d array lol
+	vector<Vector2f> cList;
+	float third = 1.0/3.0;
+	Vector2f in;
+	for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < 4; i++) {
+			in << (i*third), (j*third);
+			coords[i][j] = in;
+			cList.push_back(in);
+		}
+	}
+	
+	// first need to create initial list of triangles
+	vector<triangle> tList;
+	Vector2f v0, v1, v2, v3;
+	for (int i = 0; i < 11; i++) {
+		// 6 vectors out of 4 -> 2 triangles per loop
+		v0 = cList[i];
+		v1 = cList[i+1];
+		v2 = cList[i+5];
+		v3 = cList[i+4];
+		
+	}
+	
+	vector<triangle> t;
+	return t;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 

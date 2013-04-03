@@ -31,6 +31,7 @@ using namespace std;
 using namespace Eigen;
 
 cParser* c_Parser = NULL;
+float step;
 cSubdivide* c_Sub = NULL;
 //vector<surfacePointAndNorm> tempSurf;
 vector< vector<surfacePointAndNorm> > allUniform;
@@ -109,8 +110,10 @@ void myDisplay() {
 
 	glMatrixMode(GL_MODELVIEW);             // indicate we are specifying camera transformations
 	glLoadIdentity();               // make sure transformation is "zero'd"
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   
-	glColor3f(1.0f,0.0f,0.0f);                   // setting the color to pure red 90% for the rect
+	//glColor3f(1.0f,0.0f,0.0f);                   // setting the color to pure red 90% for the rect
 	
 	/*
 	// testing silliness
@@ -138,7 +141,7 @@ void myDisplay() {
 	glEnd();
 	*/
 	
-	
+	/*
 	glBegin(GL_POINTS);
 	
 	
@@ -152,7 +155,8 @@ void myDisplay() {
 			glVertex3f(p0, p1, p2);
 		}
 	}
-	
+	glEnd();
+	*/
 	
 	/*
 	//testing with patches for points
@@ -189,7 +193,30 @@ void myDisplay() {
 		}
 	}
 	*/
-	glEnd();
+	int numDiv = int((1/step)+.5);
+	int loopEnd;
+	Vector3f vect0, vect1, vect2, vect3;
+	// drawing polygons from vertex of SurfacePointAndNormals
+	for (int i = 0; i < allUniform.size(); i++) {
+		vector<surfacePointAndNorm> surf = allUniform[i];
+		loopEnd = ((numDiv+1)*(numDiv+1))-(numDiv+2);
+		for (int j = 0; j < loopEnd; j++) {
+			glBegin(GL_POLYGON); 
+			vect0 = surf[j].surfacePoint;
+			glVertex3f(vect0(0), vect0(1), vect0(2));
+			vect1 = surf[j+1].surfacePoint;
+			glVertex3f(vect1(0), vect1(1), vect1(2));
+			vect2 = surf[j+numDiv+2].surfacePoint;
+			glVertex3f(vect2(0), vect2(1), vect2(2));
+			vect3 = surf[j+numDiv+1].surfacePoint;
+			glVertex3f(vect3(0), vect3(1), vect3(2));
+			glEnd();
+			if (((j+1)%(numDiv+1))==0) {
+				j++;
+			}
+		}
+	}
+	
 	
 	glFlush();
   	glutSwapBuffers();          // swap buffers (we earlier set double buffer)
@@ -197,6 +224,7 @@ void myDisplay() {
 
 
 int main(int argc, char** argv) {
+
 	
 	// parser class takes in .bez file
 	// for example, make, then type in ./as3 patches/test.bez .1
@@ -205,13 +233,19 @@ int main(int argc, char** argv) {
 	vector<patch> vect_patch = c_Parser->ParseCommandLine();
 	int numOfPatches = vect_patch.size();
 	
+	// step size from parser
+	step = c_Parser->GetParam();
+	cout << step << endl;
+	
 	c_Sub = new cSubdivide();
 	//vector<surfacePointAndNorm> unif_surf_norm = c_Sub->subdivideUniform(vect_patch[0]);
 	
 	for (int i = 0; i < numOfPatches; i++) {
-		vector<surfacePointAndNorm> unifSurfPoints = c_Sub->subdivideUniform(vect_patch[i]);
+		vector<surfacePointAndNorm> unifSurfPoints = c_Sub->subdivideUniform(vect_patch[i], step);
 		allUniform.push_back(unifSurfPoints);
 	}
+	
+	c_Sub->subdivideAdaptive(vect_patch[0], step);
 	
 	//tempSurf = unif_surf_norm;
 	

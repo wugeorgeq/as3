@@ -39,6 +39,8 @@ vector<patch> cParser::ParseCommandLine() {
 		printf("./as3 [INPUT_FILE] [PARAMETER] [OPTIONAL_FLAG] \n");
 	}
 	
+	m_param = atof(m_argv[2]);
+		
 	ifstream inputfile (m_argv[1]);
 	string line;
 	vector<patch> p;
