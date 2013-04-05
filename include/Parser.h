@@ -62,6 +62,7 @@ public:
 	~cParser();
 	vector<patch> ParseCommandLine();
 	const float GetParam() const {return m_param;}
+	const int GetAdapt() const {return m_adapt;}
 	
 		
 	
@@ -69,6 +70,7 @@ private:
 	int m_argc;
 	char** m_argv;
 	float m_param;
+	int m_adapt;
 
 
 };

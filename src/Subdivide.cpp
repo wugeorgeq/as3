@@ -1,4 +1,5 @@
 #include <vector>
+#include <cmath>
 #include "Subdivide.h"
 #include "Parser.h"
 
@@ -7,11 +8,13 @@ using namespace std;
 
 cSubdivide::cSubdivide()
 {
-
+	vector<triangle> newVect;
+	adaptTri = newVect;
 }
+
 cSubdivide::~cSubdivide() {
-
 }
+
 
 curvePointAndDeriv cSubdivide::bezCurveInterp(vector<Vector3f> curve, float pValue){
 
@@ -125,16 +128,16 @@ vector<surfacePointAndNorm> cSubdivide::subdivideUniform(patch patch, float step
 
 }
 
-vector<triangle> cSubdivide::subdivideAdaptive(patch patch, float step) {
+vector<triangle> cSubdivide::subdivideAdaptive(patch patch, float param) {
 	// create 2d array of floats for u, v for the patch
-	Vector2f coords[4][4];
+	Vector3f coords[4][4];
 	// aaaand 1d array lol
-	vector<Vector2f> cList;
+	vector<Vector3f> cList;
 	float third = 1.0/3.0;
-	Vector2f in;
+	Vector3f in;
 	for (int j = 0; j < 4; j++) {
 		for (int i = 0; i < 4; i++) {
-			in << (i*third), (j*third);
+			in << (i*third), (j*third), 0;
 			coords[i][j] = in;
 			cList.push_back(in);
 		}
@@ -142,20 +145,338 @@ vector<triangle> cSubdivide::subdivideAdaptive(patch patch, float step) {
 	
 	// first need to create initial list of triangles
 	vector<triangle> tList;
-	Vector2f v0, v1, v2, v3;
+	Vector3f c0, c1, c2, c3;
+	surfacePointAndNorm spn0, spn1, spn2, spn3;
+	triangle t0, t1;
 	for (int i = 0; i < 11; i++) {
 		// 6 vectors out of 4 -> 2 triangles per loop
-		v0 = cList[i];
-		v1 = cList[i+1];
-		v2 = cList[i+5];
-		v3 = cList[i+4];
+		c0 = cList[i];
+		c1 = cList[i+1];
+		c2 = cList[i+5];
+		c3 = cList[i+4];
+		// get surface point and normals of 4 points
+		spn0 = cSubdivide::bezPatchInterp(patch, c0(0), c0(1));
+		spn1 = cSubdivide::bezPatchInterp(patch, c1(0), c1(1));
+		spn2 = cSubdivide::bezPatchInterp(patch, c2(0), c2(1));
+		spn3 = cSubdivide::bezPatchInterp(patch, c3(0), c3(1));
+		// form the length 6 vectors with u, v, surface points
+		vector<Vector3f> t0ver, t1ver;
+		t0ver.push_back(c0);
+		t0ver.push_back(c1);
+		t0ver.push_back(c3);
+		t0ver.push_back(spn0.surfacePoint);
+		t0ver.push_back(spn1.surfacePoint);
+		t0ver.push_back(spn3.surfacePoint);
+		t1ver.push_back(c1);
+		t1ver.push_back(c2);
+		t1ver.push_back(c3);
+		t1ver.push_back(spn1.surfacePoint);
+		t1ver.push_back(spn2.surfacePoint);
+		t1ver.push_back(spn3.surfacePoint);
+		// form length three norm vectors
+		vector<Vector3f> t0norm, t1norm;
+		t0norm.push_back(spn0.norm);
+		t0norm.push_back(spn1.norm);
+		t0norm.push_back(spn3.norm);
+		t1norm.push_back(spn1.norm);
+		t1norm.push_back(spn2.norm);
+		t1norm.push_back(spn3.norm);
+		t0.vertices = t0ver;
+		t1.vertices = t1ver;
+		t0.norm = t0norm;
+		t1.norm = t1norm;
+		tList.push_back(t0);
+		tList.push_back(t1);
+		if ((i==2)||(i==6)) {
+			i++;
+		}
+	}
+	
+	// cout << "right before checking triangles" << endl;
+	for (int i = 0; i < 18; i++) {
+		// cout << "checking triangle vertices" << endl;
+		cSubdivide::checkTri(tList[i], patch, param);
 		
 	}
 	
-	vector<triangle> t;
-	return t;
+	
+	return this->adaptTri;
 }
 
+void cSubdivide::checkTri(triangle tri, patch patch, float param) {
+	// getting the u,v coordinates
+	Vector3f uv0 = tri.vertices[0];
+	Vector3f uv1 = tri.vertices[1];
+	Vector3f uv2 = tri.vertices[2];
+	Vector3f v0 = tri.vertices[3];
+	Vector3f v1 = tri.vertices[4];
+	Vector3f v2 = tri.vertices[5];
+	Vector3f mid_v0 = (v0+v2)/2;
+	Vector3f mid_v1 = (v0+v1)/2;
+	Vector3f mid_v2 = (v1+v2)/2;
+	Vector3f tri_norm0 = tri.norm[0];
+	Vector3f tri_norm1 = tri.norm[1];
+	Vector3f tri_norm2 = tri.norm[2];
+	Vector3f mid_uv0 = (uv0+uv2)/2;
+	Vector3f mid_uv1 = (uv0+uv1)/2;
+	Vector3f mid_uv2 = (uv1+uv2)/2;
+	surfacePointAndNorm spn0 = cSubdivide::bezPatchInterp(patch, mid_uv0(0), mid_uv0(1));
+	surfacePointAndNorm spn1 = cSubdivide::bezPatchInterp(patch, mid_uv1(0), mid_uv1(1));
+	surfacePointAndNorm spn2 = cSubdivide::bezPatchInterp(patch, mid_uv2(0), mid_uv2(1));
+	Vector3f b0 = spn0.surfacePoint;
+	Vector3f b1 = spn1.surfacePoint;
+	Vector3f b2 = spn2.surfacePoint;
+	Vector3f mid_norm0 = spn0.norm;
+	Vector3f mid_norm1 = spn1.norm;
+	Vector3f mid_norm2 = spn2.norm;
+	int int0 = 1;
+	int int1 = 1;
+	int int2 = 1;
+	// cout << "b0 " << endl << b0 << endl;
+	// cout << "mid_uv0 " << endl << mid_uv0 << endl;
+	int test0 = abs((b0-mid_v0).norm());
+	int test1 = abs((b1-mid_v1).norm());
+	int test2 = abs((b2-mid_v2).norm());
+	/*
+	cout << "right before midpoint check " << test0 << endl;
+	cout << test1 << endl;
+	cout << test2 << endl;
+	*/
+	if (test0 < param) {
+	/*
+		cout << "yes int0 is 0" << endl;
+		cout << "b0 " << endl << b0 << endl;
+		cout << "mid_v0 " << endl << mid_v0 << endl;
+		int test0 = abs((b0-mid_v0).norm());
+		cout << "test0 " << test0 << endl;
+		cout << "param " << param << endl;
+	*/
+		int0 = 0;
+	}
+	if (test1 < param) {
+		// cout << "yes int1 is 0" << endl;
+		int1 = 0;
+	}
+	if (test2 < param) {
+		// cout << "yes int2 is 0" << endl;
+		int2 = 0;
+	}
+	if ((int0==0)&&(int1==0)&&(int2==0)) {
+		this->adaptTri.push_back(tri);
+		//cout << "pushing onto stack!" << endl;
+		return;
+	} else {
+		cout << "something's wrong lol" << endl; 
+	}
+	if ((int0==0)&&(int1==0)&&(int2==1)) {
+		triangle t0, t1;
+		t0.vertices.push_back(uv0);
+		t0.vertices.push_back(uv1);
+		t0.vertices.push_back(mid_uv0);
+		t0.vertices.push_back(v0);
+		t0.vertices.push_back(v1);
+		t0.vertices.push_back(b0);
+		t0.norm.push_back(tri_norm0);
+		t0.norm.push_back(tri_norm1);
+		t0.norm.push_back(mid_norm0);
+		t1.vertices.push_back(mid_uv0);
+		t1.vertices.push_back(uv1);
+		t1.vertices.push_back(uv2);
+		t1.vertices.push_back(b0);
+		t1.vertices.push_back(v1);
+		t1.vertices.push_back(v2);
+		t1.norm.push_back(mid_norm0);
+		t1.norm.push_back(tri_norm1);
+		t1.norm.push_back(tri_norm2);
+		cSubdivide::checkTri(t0, patch, param);
+		cSubdivide::checkTri(t1, patch, param);
+	} else if ((int0==0)&&(int1==1)&&(int2==0)) {
+		triangle t0, t1;
+		t0.vertices.push_back(uv0);
+		t0.vertices.push_back(mid_uv1);
+		t0.vertices.push_back(uv2);
+		t0.vertices.push_back(v0);
+		t0.vertices.push_back(b1);
+		t0.vertices.push_back(v2);
+		t0.norm.push_back(tri_norm0);
+		t0.norm.push_back(mid_norm1);
+		t0.norm.push_back(tri_norm2);
+		t1.vertices.push_back(mid_uv1);
+		t1.vertices.push_back(uv1);
+		t1.vertices.push_back(uv2);
+		t1.vertices.push_back(b1);
+		t1.vertices.push_back(v1);
+		t1.vertices.push_back(v2);
+		t1.norm.push_back(mid_norm1);
+		t1.norm.push_back(tri_norm1);
+		t1.norm.push_back(tri_norm2);
+		cSubdivide::checkTri(t0, patch, param);
+		cSubdivide::checkTri(t1, patch, param);
+	} else if ((int0==1)&&(int1==0)&&(int2==0)) {
+		triangle t0, t1;
+		t0.vertices.push_back(uv0);
+		t0.vertices.push_back(mid_uv2);
+		t0.vertices.push_back(uv2);
+		t0.vertices.push_back(v0);
+		t0.vertices.push_back(b2);
+		t0.vertices.push_back(v2);
+		t0.norm.push_back(tri_norm0);
+		t0.norm.push_back(mid_norm2);
+		t0.norm.push_back(tri_norm2);
+		t1.vertices.push_back(uv0);
+		t1.vertices.push_back(uv1);
+		t1.vertices.push_back(mid_uv2);
+		t1.vertices.push_back(v0);
+		t1.vertices.push_back(v1);
+		t1.vertices.push_back(b2);
+		t1.norm.push_back(tri_norm0);
+		t1.norm.push_back(tri_norm1);
+		t1.norm.push_back(mid_norm2);
+		cSubdivide::checkTri(t0, patch, param);
+		cSubdivide::checkTri(t1, patch, param);
+	} else if ((int0==0)&&(int1==1)&&(int2==1)) {
+		triangle t0, t1, t2;
+		t0.vertices.push_back(uv0);
+		t0.vertices.push_back(mid_uv1);
+		t0.vertices.push_back(mid_uv0);
+		t0.vertices.push_back(v0);
+		t0.vertices.push_back(b1);
+		t0.vertices.push_back(b0);
+		t0.norm.push_back(tri_norm0);
+		t0.norm.push_back(mid_norm1);
+		t0.norm.push_back(mid_norm0);
+		t1.vertices.push_back(mid_uv0);
+		t1.vertices.push_back(mid_uv1);
+		t1.vertices.push_back(uv2);
+		t1.vertices.push_back(b0);
+		t1.vertices.push_back(b1);
+		t1.vertices.push_back(v2);
+		t1.norm.push_back(mid_norm0);
+		t1.norm.push_back(mid_norm1);
+		t1.norm.push_back(tri_norm2);
+		t2.vertices.push_back(mid_uv1);
+		t2.vertices.push_back(uv1);
+		t2.vertices.push_back(uv2);
+		t2.vertices.push_back(b1);
+		t2.vertices.push_back(v1);
+		t2.vertices.push_back(v2);
+		t2.norm.push_back(mid_norm1);
+		t2.norm.push_back(tri_norm1);
+		t2.norm.push_back(tri_norm2);
+		cSubdivide::checkTri(t0, patch, param);
+		cSubdivide::checkTri(t1, patch, param);
+		cSubdivide::checkTri(t2, patch, param);
+	} else if ((int0==1)&&(int1==1)&&(int2==0)) {
+		triangle t0, t1, t2;
+		t0.vertices.push_back(uv0);
+		t0.vertices.push_back(mid_uv2);
+		t0.vertices.push_back(uv2);
+		t0.vertices.push_back(v0);
+		t0.vertices.push_back(b2);
+		t0.vertices.push_back(v2);
+		t0.norm.push_back(tri_norm0);
+		t0.norm.push_back(mid_norm2);
+		t0.norm.push_back(tri_norm2);
+		t1.vertices.push_back(uv0);
+		t1.vertices.push_back(mid_uv1);
+		t1.vertices.push_back(mid_uv2);
+		t1.vertices.push_back(v0);
+		t1.vertices.push_back(b1);
+		t1.vertices.push_back(b2);
+		t1.norm.push_back(tri_norm0);
+		t1.norm.push_back(mid_norm1);
+		t1.norm.push_back(mid_norm2);
+		t2.vertices.push_back(mid_uv1);
+		t2.vertices.push_back(uv1);
+		t2.vertices.push_back(mid_uv2);
+		t2.vertices.push_back(b1);
+		t2.vertices.push_back(v1);
+		t2.vertices.push_back(b2);
+		t2.norm.push_back(mid_norm1);
+		t2.norm.push_back(tri_norm1);
+		t2.norm.push_back(mid_norm2);
+		cSubdivide::checkTri(t0, patch, param);
+		cSubdivide::checkTri(t1, patch, param);
+		cSubdivide::checkTri(t2, patch, param);	
+	} else if ((int0==1)&&(int1==0)&&(int2==1)) {
+		triangle t0, t1, t2;
+		t0.vertices.push_back(mid_uv0);
+		t0.vertices.push_back(mid_uv2);
+		t0.vertices.push_back(uv2);
+		t0.vertices.push_back(b0);
+		t0.vertices.push_back(b2);
+		t0.vertices.push_back(v2);
+		t0.norm.push_back(mid_norm0);
+		t0.norm.push_back(mid_norm2);
+		t0.norm.push_back(tri_norm2);
+		t1.vertices.push_back(uv0);
+		t1.vertices.push_back(uv1);
+		t1.vertices.push_back(mid_uv0);
+		t1.vertices.push_back(v0);
+		t1.vertices.push_back(v1);
+		t1.vertices.push_back(b0);
+		t1.norm.push_back(tri_norm0);
+		t1.norm.push_back(tri_norm1);
+		t1.norm.push_back(mid_norm0);
+		t2.vertices.push_back(mid_uv0);
+		t2.vertices.push_back(uv1);
+		t2.vertices.push_back(mid_uv2);
+		t2.vertices.push_back(b0);
+		t2.vertices.push_back(v1);
+		t2.vertices.push_back(b2);
+		t2.norm.push_back(mid_norm0);
+		t2.norm.push_back(tri_norm1);
+		t2.norm.push_back(mid_norm2);
+		cSubdivide::checkTri(t0, patch, param);
+		cSubdivide::checkTri(t1, patch, param);
+		cSubdivide::checkTri(t2, patch, param);	
+	} else if ((int0==1)&&(int1==1)&&(int2==1)) {
+		// cout << "here at worst case subdivide" << endl;
+		triangle t0, t1, t2, t3;
+		t0.vertices.push_back(mid_uv0);
+		t0.vertices.push_back(mid_uv2);
+		t0.vertices.push_back(uv2);
+		t0.vertices.push_back(b0);
+		t0.vertices.push_back(b2);
+		t0.vertices.push_back(v2);
+		t0.norm.push_back(mid_norm0);
+		t0.norm.push_back(mid_norm2);
+		t0.norm.push_back(tri_norm2);
+		t1.vertices.push_back(uv0);
+		t1.vertices.push_back(mid_uv1);
+		t1.vertices.push_back(mid_uv0);
+		t1.vertices.push_back(v0);
+		t1.vertices.push_back(b1);
+		t1.vertices.push_back(b0);
+		t1.norm.push_back(tri_norm0);
+		t1.norm.push_back(mid_norm1);
+		t1.norm.push_back(mid_norm0);
+		t2.vertices.push_back(mid_uv0);
+		t2.vertices.push_back(mid_uv1);
+		t2.vertices.push_back(mid_uv2);
+		t2.vertices.push_back(b0);
+		t2.vertices.push_back(b1);
+		t2.vertices.push_back(b2);
+		t2.norm.push_back(mid_norm0);
+		t2.norm.push_back(mid_norm1);
+		t2.norm.push_back(mid_norm2);
+		t3.vertices.push_back(mid_uv1);
+		t3.vertices.push_back(uv1);
+		t3.vertices.push_back(mid_uv2);
+		t3.vertices.push_back(b1);
+		t3.vertices.push_back(v1);
+		t3.vertices.push_back(b2);
+		t3.norm.push_back(mid_norm1);
+		t3.norm.push_back(tri_norm1);
+		t3.norm.push_back(mid_norm2);
+		cSubdivide::checkTri(t0, patch, param);
+		cSubdivide::checkTri(t1, patch, param);
+		cSubdivide::checkTri(t2, patch, param);
+		cSubdivide::checkTri(t3, patch, param);	
+	}
+	
+
+}
 
 
 

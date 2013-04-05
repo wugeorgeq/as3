@@ -40,6 +40,17 @@ vector<patch> cParser::ParseCommandLine() {
 	}
 	
 	m_param = atof(m_argv[2]);
+	
+	if (m_argc == 3) {
+		m_adapt = 0;
+	} else {
+		string s(m_argv[3]);
+		if (s == "-a") {
+			m_adapt = 1;
+		} else {
+			m_adapt = 0;
+		}
+	}
 		
 	ifstream inputfile (m_argv[1]);
 	string line;

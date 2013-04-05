@@ -42,6 +42,14 @@ vector< vector<surfacePointAndNorm> > allUniform;
 //want a global vector of patches, just to draw patches and see what it looks like
 vector<patch> patchesTesting;
 
+// want a global vector of triangles
+vector< vector<triangle> > triTesting;
+
+vector<triangle> allAdapt;
+
+// int uniform or adaptive, uniform = 0, adaptive = 1
+int u_or_a;
+
 //****************************************************
 // Some Classes
 //****************************************************
@@ -78,6 +86,9 @@ void initScene(){
 void myReshape(int w, int h) {
   viewport.w = w;
   viewport.h = h;
+  
+  if(h == 0) { h = 1; }
+  float ratio = 1.0* w / h;
 
   glViewport (0,0,viewport.w,viewport.h);
   glMatrixMode(GL_PROJECTION);
@@ -86,6 +97,8 @@ void myReshape(int w, int h) {
   
   // from example_00
   glOrtho(-4.0, 4.0, -4.0, 4.0, -4.0, 4.0);
+  
+  
 
 }
 
@@ -216,32 +229,87 @@ void myDisplay() {
 		}
 	}
 	*/
-	int numDiv = int((1/step)+.5);
-	int loopEnd;
-	Vector3f vect0, vect1, vect2, vect3;
-	// drawing polygons from vertex of SurfacePointAndNormals
-	for (int i = 0; i < allUniform.size(); i++) {
-		vector<surfacePointAndNorm> surf = allUniform[i];
-		loopEnd = ((numDiv+1)*(numDiv+1))-(numDiv+2);
-		for (int j = 0; j < loopEnd; j++) {
-			glBegin(GL_POLYGON); 
-			vect0 = surf[j].surfacePoint;
-			glVertex3f(vect0(0), vect0(1), vect0(2));
-			vect1 = surf[j+1].surfacePoint;
-			glVertex3f(vect1(0), vect1(1), vect1(2));
-			vect2 = surf[j+numDiv+2].surfacePoint;
-			glVertex3f(vect2(0), vect2(1), vect2(2));
-			vect3 = surf[j+numDiv+1].surfacePoint;
-			glVertex3f(vect3(0), vect3(1), vect3(2));
+	
+	/*
+	// this is testing the triangles formed from the patches, begin adaptive testing
+	Vector3f v0, v1, v2;
+	for (int i = 0; i < triTesting.size(); i++) {
+		vector<triangle> surf = triTesting[i];
+		for (int j = 0; j < surf.size(); j++) {
+			triangle tri = surf[j];
+			v0 = tri.vertices[3];
+			// cout << v0 << endl << endl;
+			v1 = tri.vertices[4];
+			// cout << v1 << endl << endl;
+			v2 = tri.vertices[5];
+			// cout << v2 << endl << endl;
+			glBegin(GL_POLYGON);
+			glVertex3f(v0(0), v0(1), v0(2));
+			glVertex3f(v1(0), v1(1), v1(2));
+			glVertex3f(v2(0), v2(1), v2(2));
 			glEnd();
-			if (((j+1)%(numDiv+1))==0) {
-				j++;
+		}
+	}
+	*/
+	
+	
+	if (u_or_a == 0) {	
+	
+		// this is uniform subdivision, drawing polygons
+		int numDiv = int((1/step)+.5);
+		int loopEnd;
+		Vector3f vect0, vect1, vect2, vect3;
+		// drawing polygons from vertex of SurfacePointAndNormals
+		for (int i = 0; i < allUniform.size(); i++) {
+			vector<surfacePointAndNorm> surf = allUniform[i];
+			loopEnd = ((numDiv+1)*(numDiv+1))-(numDiv+2);
+			for (int j = 0; j < loopEnd; j++) {
+				glBegin(GL_POLYGON); 
+				vect0 = surf[j].surfacePoint;
+				glVertex3f(vect0(0), vect0(1), vect0(2));
+				vect1 = surf[j+1].surfacePoint;
+				glVertex3f(vect1(0), vect1(1), vect1(2));
+				vect2 = surf[j+numDiv+2].surfacePoint;
+				glVertex3f(vect2(0), vect2(1), vect2(2));
+				vect3 = surf[j+numDiv+1].surfacePoint;
+				glVertex3f(vect3(0), vect3(1), vect3(2));
+				glEnd();
+				if (((j+1)%(numDiv+1))==0) {
+					j++;
+				}
 			}
+		}
+		
+	} else {
+	
+		//drawing triangles from adaptiveSubdivision
+		Vector3f v0, v1, v2;
+		for (int i = 0; i < allAdapt.size(); i++) {
+			triangle tri = allAdapt[i];
+			v0 = tri.vertices[3];
+			v1 = tri.vertices[4];
+			v2 = tri.vertices[5];
+			glBegin(GL_POLYGON);
+			glVertex3f(v0(0), v0(1), v0(2));
+			glVertex3f(v1(0), v1(1), v1(2));
+			glVertex3f(v2(0), v2(1), v2(2));
+			glEnd();
 		}
 	}
 	
+<<<<<<< HEAD
+=======
+	
+		
+>>>>>>> Uniform and Adapt should be working
 	glFlush();
   	glutSwapBuffers();          // swap buffers (we earlier set double buffer)
+}
+
+void processNormalKeys(unsigned char key, int x, int y) {
+
+	if (key == 27)
+		exit(0);
 }
 
 
@@ -258,17 +326,25 @@ int main(int argc, char** argv) {
 	
 	// step size from parser
 	step = c_Parser->GetParam();
-	cout << step << endl;
+	
+	// uniform or adaptive from parser
+	u_or_a = c_Parser->GetAdapt();
 	
 	c_Sub = new cSubdivide();
 	//vector<surfacePointAndNorm> unif_surf_norm = c_Sub->subdivideUniform(vect_patch[0]);
 	
-	for (int i = 0; i < numOfPatches; i++) {
-		vector<surfacePointAndNorm> unifSurfPoints = c_Sub->subdivideUniform(vect_patch[i], step);
-		allUniform.push_back(unifSurfPoints);
+	if (u_or_a == 0) {
+		for (int i = 0; i < numOfPatches; i++) {
+			vector<surfacePointAndNorm> unifSurfPoints = c_Sub->subdivideUniform(vect_patch[i], step);
+			allUniform.push_back(unifSurfPoints);
+		}
+	} else {
+		for (int i = 0; i < numOfPatches; i++) {
+			vector<triangle> tri = c_Sub->subdivideAdaptive(vect_patch[i], step);
+			triTesting.push_back(tri);
+		}
+		allAdapt = c_Sub->getAdaptTri();
 	}
-	
-	c_Sub->subdivideAdaptive(vect_patch[0], step);
 	
 	//tempSurf = unif_surf_norm;
 	
@@ -297,7 +373,14 @@ int main(int argc, char** argv) {
     
     glutReshapeFunc(myReshape);        // function to run when the window gets resized
   	glutDisplayFunc(myDisplay);				// function to run when its time to draw something
+<<<<<<< HEAD
   	glutKeyboardFunc(mykeyFunc);
+=======
+  	glutReshapeFunc(myReshape);				// function to run when the window gets resized
+
+	glutKeyboardFunc(processNormalKeys);
+
+>>>>>>> Uniform and Adapt should be working
   	glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
   	

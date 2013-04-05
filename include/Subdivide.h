@@ -20,7 +20,7 @@ struct surfacePointAndNorm {
 };
 
 struct triangle {
-	// should be length 5, storing first two u,v then second three actual coords
+	// should be length 6, storing u,v then actual coords
 	vector<Vector3f> vertices;
 	// should be length 3
 	vector<Vector3f> norm;
@@ -31,17 +31,15 @@ public:
 	cSubdivide();
 	~cSubdivide();
 
-	curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float); 
-	surfacePointAndNorm bezPatchInterp(patch, float, float); 
+	static curvePointAndDeriv bezCurveInterp(vector<Vector3f>, float); 
+	static surfacePointAndNorm bezPatchInterp(patch, float, float); 
 	//virtual void subdividePatch(Vector3f);
 	vector<surfacePointAndNorm> subdivideUniform(patch, float);
 	vector<triangle> subdivideAdaptive(patch, float);
-	float getParam() const {return param;}
-
-
+	void checkTri(triangle, patch, float);
+	vector<triangle> getAdaptTri() {return adaptTri;}
 private:
-	float param;
-
+	vector<triangle> adaptTri;
 };
 
 
