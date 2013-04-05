@@ -134,8 +134,52 @@ void mykeyFunc(unsigned char key, int x, int y){
       shadeModel = GL_FLAT;
     }
   }
-  
+  	if (key == 27)
+		exit(0);
 }
+
+void processSpecialKeys(int key, int xx, int yy) {
+
+	float fraction = 0.1f;
+
+	switch (key) {
+		case GLUT_KEY_LEFT :
+			cout << "left" << endl;
+			/*
+			angle -= 0.01f;
+			lx = sin(angle);
+			lz = -cos(angle);
+			break;
+			*/
+			break;
+		case GLUT_KEY_RIGHT :
+			cout << "right" << endl;
+			/*
+			angle += 0.01f;
+			lx = sin(angle);
+			lz = -cos(angle);
+			break;
+			*/
+			break;
+		case GLUT_KEY_UP :
+			cout << "up" << endl;
+			/*
+			x += lx * fraction;
+			z += lz * fraction;
+			break;
+			*/
+			break;
+		case GLUT_KEY_DOWN :
+			cout << "down" << endl;
+			/*
+			x -= lx * fraction;
+			z -= lz * fraction;
+			break;
+			*/
+			break;
+	}
+}
+
 //****************************************************
 // function that does the actual drawing of stuff
 //***************************************************
@@ -146,7 +190,9 @@ void myDisplay() {
 	glMatrixMode(GL_MODELVIEW);             // indicate we are specifying camera transformations
 	glLoadIdentity();               // make sure transformation is "zero'd"
 	
-  glShadeModel(shadeModel);
+	//cout << "called" << endl;
+	
+    glShadeModel(shadeModel);
 	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
   
 	//glColor3f(1.0f,0.0f,0.0f);                   // setting the color to pure red 90% for the rect
@@ -297,11 +343,6 @@ void myDisplay() {
 		}
 	}
 	
-<<<<<<< HEAD
-=======
-	
-		
->>>>>>> Uniform and Adapt should be working
 	glFlush();
   	glutSwapBuffers();          // swap buffers (we earlier set double buffer)
 }
@@ -372,15 +413,10 @@ int main(int argc, char** argv) {
 
     
     glutReshapeFunc(myReshape);        // function to run when the window gets resized
-  	glutDisplayFunc(myDisplay);				// function to run when its time to draw something
-<<<<<<< HEAD
+  	glutDisplayFunc(myDisplay);				// function to run when its time to draw somethin
   	glutKeyboardFunc(mykeyFunc);
-=======
-  	glutReshapeFunc(myReshape);				// function to run when the window gets resized
+  	glutSpecialFunc(processSpecialKeys);
 
-	glutKeyboardFunc(processNormalKeys);
-
->>>>>>> Uniform and Adapt should be working
   	glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
   	
