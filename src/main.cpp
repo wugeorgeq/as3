@@ -50,6 +50,29 @@ vector<triangle> allAdapt;
 // int uniform or adaptive, uniform = 0, adaptive = 1
 int u_or_a;
 
+
+
+
+
+// from website
+float XUP[3] = {1,0,0}, XUN[3] = {-1, 0, 0},
+      YUP[3] = {0,1,0}, YUN[3] = { 0,-1, 0},
+      ZUP[3] = {0,0,1}, ZUN[3] = { 0, 0,-1},
+      ORG[3] = {0,0,0};
+ 
+GLfloat viewangle = 0, tippangle = 0, traj[120][3];
+ 
+GLfloat d[3] = {0.1, 0.1, 0.1};
+ 
+GLfloat  xAngle = 0.0, yAngle = 0.0, zAngle = 0.0;
+
+
+
+
+
+
+
+
 //****************************************************
 // Some Classes
 //****************************************************
@@ -136,8 +159,16 @@ void mykeyFunc(unsigned char key, int x, int y){
   }
   	if (key == 27)
 		exit(0);
+		
+	switch (key) {
+       case 'j' : d[0] += 0.1;  break;
+       case 'k' : d[1] += 0.1;  break;
+       case 'l' : d[2] += 0.1;  break;
+       }
+       glutPostRedisplay();
 }
 
+/*
 void processSpecialKeys(int key, int xx, int yy) {
 
 	float fraction = 0.1f;
@@ -145,39 +176,48 @@ void processSpecialKeys(int key, int xx, int yy) {
 	switch (key) {
 		case GLUT_KEY_LEFT :
 			cout << "left" << endl;
-			/*
+			
 			angle -= 0.01f;
 			lx = sin(angle);
 			lz = -cos(angle);
-			break;
-			*/
+		
 			break;
 		case GLUT_KEY_RIGHT :
 			cout << "right" << endl;
-			/*
+			
 			angle += 0.01f;
 			lx = sin(angle);
 			lz = -cos(angle);
 			break;
-			*/
-			break;
 		case GLUT_KEY_UP :
 			cout << "up" << endl;
-			/*
+			
 			x += lx * fraction;
 			z += lz * fraction;
 			break;
-			*/
-			break;
 		case GLUT_KEY_DOWN :
 			cout << "down" << endl;
-			/*
+			
 			x -= lx * fraction;
 			z -= lz * fraction;
 			break;
-			*/
-			break;
 	}
+}
+*/
+
+void Special_Keys (int key, int x, int y)
+{
+    switch (key) {
+ 
+       case GLUT_KEY_LEFT :  viewangle -= 5;  break;
+       case GLUT_KEY_RIGHT:  viewangle += 5;  break;
+       case GLUT_KEY_UP   :  tippangle -= 5;  break;
+       case GLUT_KEY_DOWN :  tippangle += 5;  break;
+ 
+       default: printf ("   Special key %c == %d\n", key, key);
+    }
+ 
+    glutPostRedisplay();
 }
 
 //****************************************************
@@ -190,10 +230,17 @@ void myDisplay() {
 	glMatrixMode(GL_MODELVIEW);             // indicate we are specifying camera transformations
 	glLoadIdentity();               // make sure transformation is "zero'd"
 	
-	//cout << "called" << endl;
+	
+	// cout << "called" << endl;
+	
+	glRotatef (tippangle, 1,0,0);  // Up and down arrow keys 'tip' view.
+    glRotatef (viewangle, 0,0,1);  // Right/left arrow keys 'turn' view.
 	
     glShadeModel(shadeModel);
 	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+	
+	glPushMatrix();
+	glTranslatef (d[0], d[1], d[2]);    // Move box down X axis.
   
 	//glColor3f(1.0f,0.0f,0.0f);                   // setting the color to pure red 90% for the rect
 	
@@ -320,7 +367,7 @@ void myDisplay() {
 				vect3 = surf[j+numDiv+1].surfacePoint;
 				glVertex3f(vect3(0), vect3(1), vect3(2));
 				glEnd();
-				if (((j+1)%(numDiv+1))==0) {
+				if (((j+2)%(numDiv+1))==0) {
 					j++;
 				}
 			}
@@ -342,6 +389,7 @@ void myDisplay() {
 			glEnd();
 		}
 	}
+	glPopMatrix();
 	
 	glFlush();
   	glutSwapBuffers();          // swap buffers (we earlier set double buffer)
@@ -415,7 +463,7 @@ int main(int argc, char** argv) {
     glutReshapeFunc(myReshape);        // function to run when the window gets resized
   	glutDisplayFunc(myDisplay);				// function to run when its time to draw somethin
   	glutKeyboardFunc(mykeyFunc);
-  	glutSpecialFunc(processSpecialKeys);
+  	glutSpecialFunc(Special_Keys);
 
   	glutMainLoop();							// infinite loop that will keep drawing and resizing
   	// and whatever else
