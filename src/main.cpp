@@ -30,8 +30,8 @@
 using namespace std;
 using namespace Eigen;
 
-GLenum shadeModel = GL_FLAT;
-GLenum polygonMode = GL_LINE; 
+GLenum shadeModel = GL_SMOOTH;
+GLenum polygonMode = GL_FILL; 
 
 cParser* c_Parser = NULL;
 float step;
@@ -92,13 +92,36 @@ Viewport	viewport;
 // Simple init function
 //****************************************************
 void initScene(){
-	/*
+	
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0); 
-	GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	*/
-  // Nothing to do here for this simple example.
+	glEnable(GL_NORMALIZE);
+	//GLfloat lightColor0[] = {0.5f, 0.5f, 0.5f, 1.0f};
+	GLfloat light_ambient0[] = {0.2f, 0.2f, 0.2f, 1.0f};
+	GLfloat light_diffuse0[] = {0.8f, 0.8f, 0.8f, 1.0f};
+	GLfloat light_specular0[] = {1.0f, 1.0f, 1.0f, 1.0f};
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
+	GLfloat lightPos0[] = {0.0f, 2.0f, -0.5f, 1.0f};
+	//glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor0);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+
+	GLfloat green[] = {0.0f, 1.0f, 0.0f, 1.0f};
+	GLfloat red[] = {1.0f, 0.0f, 0.0f, 1.0f};
+	GLfloat blue[] = {0.0f, 0.0f, 1.0f, 1.0f};
+	GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
+	GLfloat lowAmbient[] = {0.2f, 0.2f, 0.2f, 1.0f};
+	GLfloat shininess[] = {128.0f};
+	glMaterialfv(GL_FRONT, GL_AMBIENT, blue);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
+	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+	//glLightfv(GL_LIGHT0, GL_AMBIENT, lowAmbient);
+
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, mcolor);
+	//glLightModelfv(GL_LIGH_MODEL_AMBIENT, global_ambient);
+	// Nothing to do here for this simple example.
 
 }
 
@@ -225,8 +248,8 @@ void Special_Keys (int key, int x, int y)
 //***************************************************
 void myDisplay() {
 
-	glClear(GL_COLOR_BUFFER_BIT);       // clear the color buffer
-
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // clear the color buffer
+	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);             // indicate we are specifying camera transformations
 	glLoadIdentity();               // make sure transformation is "zero'd"
 	
@@ -351,7 +374,7 @@ void myDisplay() {
 		// this is uniform subdivision, drawing polygons
 		int numDiv = int((1/step)+.5);
 		int loopEnd;
-		Vector3f vect0, vect1, vect2, vect3;
+		Vector3f vect0, vect1, vect2, vect3, norm0;
 		// drawing polygons from vertex of SurfacePointAndNormals
 		for (int i = 0; i < allUniform.size(); i++) {
 			vector<surfacePointAndNorm> surf = allUniform[i];
@@ -359,9 +382,9 @@ void myDisplay() {
 			for (int j = 0; j < loopEnd; j++) {
 				glBegin(GL_POLYGON); 
 				vect0 = surf[j].surfacePoint;
-				glVertex3f(vect0(0), vect0(1), vect0(2));
+				glVertex3f(vect0(0), vect0(1), vect0(2));				
 				vect1 = surf[j+1].surfacePoint;
-				glVertex3f(vect1(0), vect1(1), vect1(2));
+				glVertex3f(vect1(0), vect1(1), vect1(2));				
 				vect2 = surf[j+numDiv+2].surfacePoint;
 				glVertex3f(vect2(0), vect2(1), vect2(2));
 				vect3 = surf[j+numDiv+1].surfacePoint;
@@ -446,7 +469,7 @@ int main(int argc, char** argv) {
   	glutInit(&argc, argv);
 
   	//This tells glut to use a double-buffered window with red, green, and blue channels 
-  	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+  	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
   	// Initalize theviewport size
   	viewport.w = 400;
